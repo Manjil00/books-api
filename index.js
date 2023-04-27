@@ -21,14 +21,23 @@ app.get('/', (req,res) =>{
 
 //  console.log(req)
 
- res.send("chaprii")
+ res.send("babayaga")
 
 })
 
 app.use('/books', books_routes )
-app.listen(port,()=>{
 
-console.log(`server is running at port ${port}`)
-
+//Error handling middleware
+app.use((err, req ,res ,next)=> {
+    console.error(err)
+    if (err.name==='ValidationError')res.status(400)
+    else if (err.name==='CastError')res.status(400)
+    console.log(err.message)
+    res.json({error:err.message}) 
+    
 })
 
+
+app.listen(port,()=>{
+    console.log(`server is running at port ${port}`)
+})
