@@ -1,46 +1,17 @@
 ﻿const express = require('express')
 const Book = require('../models/book')
-// let books = require('../data/books')
+const bookController = require('../controllers/book-controller')
 const router = express.Router()
 
 router.route('/')
-    .get(async (req, res,next) =>{
-        Book.find()
-         .then(books => res.json(books))
-         .catch(next)
-
-    })
-    .post((req,res, next) => {
-        Book.create(req.body)
-        .then(book => res.status(201).json(book))
-        .catch(next)
-    })
-    // .post((req,res)=>{
-    //     if(!req.body.title){    // provide error message
-    //         return res.status(400).json({error: "title is missing"})
-
-    //     }
-
-    //     const book = {
-    //     id : books.length+1,    //add a book with title and author name to the previous list of book
-    //     title: req.body.title,
-    //     author: req.body.author || 'Anonymous'
-    // }
-
-    // books.push(book)
-    //     res.status(201).json(book)
-    // })
-
+    .get(bookController.getAllBooks)
+    .post(bookController.createBook)
     .put((req,res) =>{
         res.status(405).json({error: "PUT request is not allowed"})
     })
 
 
-    .delete((res, req,next) =>{
-        Book.deleteMany()
-        .then(reply => res.json(reply))
-        .catch(next)
-    })  
+    .delete(bookController.deleteAllBooks)  
 
     router.route('/:book_id')
     .get((req, res,next) =>{
@@ -105,7 +76,7 @@ router.route('/')
                 .json(book.reviews[book.reviews.length-1]))
             .catch(next)
         }))
-        .catch(next)/
+        .catch(next)
     })
     .put((req,res) =>{
         res.status(405).json({error: "PUT request is not allowed"})
@@ -131,7 +102,7 @@ router.route('/')
             }
             const review =book.reviews.indexOf(req.params.reviews_id)
             if(!book) {
-                res.status(404).json({error: 'reviewa not found'}) 
+                res.status(404).json({error: 'reviews not found'}) 
                 res.json(review)   
             }
         })
@@ -144,7 +115,7 @@ router.route('/')
                 res.status(404).json({error: 'book not found'})    
             }
             book.reviews =  book.reviews.map((r)=>{
-                if(r._id === req.params.reviews_id){
+                if(r.id === req.params.reviews_id){
                     r.text = req.body.text
                 }
                 return r
@@ -161,11 +132,13 @@ router.route('/')
                 if(!book) { res.status(404).json({error: 'book not found'})
         }
                 book.reviews=book.reviews.filter((r) => {
-                    return r._id !== req.params.reviews_id
+                    return r.id !== req.params.reviews_id
                 })
                 book.save()
                     .then((book)=> res.status(204).end())
                     .catch(next)
         }).catch(next)
     })
+
+
 module.exports = router

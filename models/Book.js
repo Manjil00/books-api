@@ -1,25 +1,41 @@
-const mongoose=require('mongoose')
-
-const reviewSchema=new mongoose.Schema({
+const mongoose = require("mongoose")
+const user = require("./user")
+const reviewSchema = new mongoose.Schema({
     text:{
-        type:String,
+        type: String,
         required: true,
-        minLength:10,
+        minLength: 10
+    },
+    user:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User'
     }
 })
-const bookSchema=new mongoose.Schema({
-    title: {
+reviewSchema.set('toJSON',{
+    transform:(document, returnedDocument) =>{
+        returnedDocument.id = document._id.toString()
+        delete returnedDocument._id
+    }
+
+})
+
+const bookSchema = new mongoose.Schema({
+    title:{
         type: String,
-        required:true
+        required : true
     },
-    author: {
+    author:{
         type:String,
-        default:'Anonymous'
+        default:"Annonymous"
     },
+    reviews:['reviewSchema0'] //embedded reviews in book.
+},{timestamps: true})
 
-    reviews:[reviewSchema]
-},
-
-{timestamps:true})
-
-module.exports=mongoose.model('Book',bookSchema)
+bookSchema.set('toJSON',{
+    transform: (document, returnedDocument) => {
+        returnedDocument.id = document._id.toString()
+        delete returnedDocument._id
+        delete returnedDocument.__V
+    }
+})
+module.exports = mongoose.model('Book', bookSchema)
